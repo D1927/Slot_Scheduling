@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
+const bcrypt = require("bcryptjs")
 
 const patient_schema = new mongoose.Schema({
     name : {
@@ -11,7 +12,7 @@ const patient_schema = new mongoose.Schema({
         type : String ,
         trim : true ,
         lowercase : true ,
-        validate : [validator.isEmail , "Email must be Unique !"] ,
+        validate : [validator.isEmail , "Invalid Email !"] ,
         unique : true ,
         required : [true , "Email is must !"]
     } ,
@@ -35,6 +36,14 @@ const patient_schema = new mongoose.Schema({
     }
 } , {
     timestamps : true
+})
+
+patient_schema.pre("save" , async function(next) {
+    if (!this.isModified("password"))  
+        return
+
+    this.password = await bcrypt.hash(this.password , 12) // Hashing
+    this.confirm_password = undefined // remove it
 })
 
 const Patient = mongoose.model("Patient" , patient_schema)

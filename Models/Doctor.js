@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
+const bcrypt = require("bcryptjs")
 
 const doctor_schema = new mongoose.Schema({
     name : {
@@ -11,7 +12,7 @@ const doctor_schema = new mongoose.Schema({
         type : String ,
         trim : true ,
         lowercase : true ,
-        validate : [validator.isEmail , "Email must be Unique !"] ,
+        validate : [validator.isEmail , "Invalid Email !"] ,
         unique : true ,
         required : [true , "Email is must !"]
     } ,
@@ -26,7 +27,7 @@ const doctor_schema = new mongoose.Schema({
             minlength : 3 ,
             select : false
         } ,
-        confirm_password : {
+    confirm_password : {
             type : String ,
             trim : true , 
             required : [true , "Confirm Password is must !"] ,
@@ -39,6 +40,14 @@ const doctor_schema = new mongoose.Schema({
         }
 } , {
     timestamps : true
+})
+
+doctor_schema.pre("save" , async function(next) {
+    if (!this.isModified("password"))
+        return
+
+    this.password = await bcrypt.hash(this.password , 12)
+    this.confirm_password = undefined 
 })
 
 const Doctor = mongoose.model("Doctor" , doctor_schema)
