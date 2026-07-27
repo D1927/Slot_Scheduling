@@ -1,6 +1,8 @@
 const Booking = require("./../Models/Booking")
 const send_email = require("./email")
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function notify_affected_patients(affected_slots) {
     const slot_ids = affected_slots.map(slot => slot._id)
 
